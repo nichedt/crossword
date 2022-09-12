@@ -13,7 +13,7 @@ function App() {
           letter: 'x',
           isCursor: false,
           isWord: false,
-          isBlank: false,
+          isBlank: i === 3 || j === 5,
           i: i,
           j: j,
         }
@@ -39,13 +39,34 @@ function App() {
       return (row.map((cell, _j) => { 
         if (_i === i && _j === j)
           return { ...cell, isCursor: true, isWord: false }
-        else if (dir === 'across' && _i === i)
-          return { ...cell, isCursor: false, isWord: true }
-        else if (dir === 'down' && _j === j)
-          return { ...cell, isCursor: false, isWord: true }
         return { ...cell, isCursor: false, isWord: false }
       } ))
     })
+
+    if (dir === 'across')
+    {
+      for (let _i=i-1; 0<=_i; _i--) {
+        if (newCells[_i][j]['isBlank'])
+          break;
+        newCells[_i][j]['isWord'] = true
+      }
+      for (let _i=i+1; _i<gridSize; _i++) {
+        if (newCells[_i][j]['isBlank'])
+          break;
+        newCells[_i][j]['isWord'] = true
+      }
+    } else if (dir === 'down') {
+      for (let _j=j-1; 0<=_j; _j--) {
+        if (newCells[i][_j]['isBlank'])
+          break;
+        newCells[i][_j]['isWord'] = true
+      }
+      for (let _j=j+1; _j<gridSize; _j++) {
+        if (newCells[i][_j]['isBlank'])
+          break;
+        newCells[i][_j]['isWord'] = true
+      }
+    }
 
     setCells(newCells)
     setCursor({i:i, j:j, dir:dir})
