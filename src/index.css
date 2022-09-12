@@ -22,8 +22,19 @@
   height: 100%;
 }
 
+.box.cursor {
+  position: absolute;
+  background-color: rgba(0, 255, 0, 0.5);
+}
+
+.box.blank {
+  position: absolute;
+  background-color: rgba(0, 0, 255, 0.5);
+}
+
 .box {
   position: absolute;
+  background-color: rgba(0, 2, 0, 0.05);
   top: 0;
   left: 0;
   bottom: 1px;
@@ -34,7 +45,6 @@
   text-align: center;
   cursor: default;
   pointer-events: none;
-  background-color: rgba(0, 2, 0, 0.05);
 }
 
 .marker {
