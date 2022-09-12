@@ -4,13 +4,15 @@ import Header from './components/Header'
 import Grid from './components/Grid'
 
 function App() {
+  const [gridSize, setGridSize] = useState(15)
   const [cells, setCells] = useState(
-    Array(15).fill().map((_,i) =>
-      new Array(15).fill().map((_,j) => {
+    Array(gridSize).fill().map((_,i) =>
+      new Array(gridSize).fill().map((_,j) => {
         return {
           marker: 2,
           letter: 'x',
           isCursor: false,
+          isWord: false,
           isBlank: false,
           i: i,
           j: j,
@@ -18,24 +20,35 @@ function App() {
       })
     )
   )
-  const [cursor, setCursor] = useState([-1, -1])
+  const [cursor, setCursor] = useState({
+    i: -1,
+    j: -1,
+    dir: 'across',
+  })
 
   const moveCursor = (i, j) => {
-    // newCells = cells.map((row, _i) => {
-    //   row.map((cell, _j) => {
-    //     ...cell, isCursor = true;
-    //   }
-    // })
-    // let oldRow = cursor[0]
-    // let oldCol = cursor[1]
-    // if (0 <= oldRow && oldRow <= cells.length
-    // && 0 <= oldCol && oldCol <= cells[0].length) {
-    //   cells[oldRow][oldCol].isCursor = false;
-    // }
-    // cells[row][col].isCursor = true;
-    
-    // setCells(cells)
-    // setCursor([row, col])
+    let old_i = cursor['i']
+    let old_j = cursor['j']
+    let dir = cursor['dir']
+
+    if (old_i === i && old_j === j) {
+      dir = (dir === 'across') ? 'down' : 'across'
+    }
+
+    let newCells = cells.map((row, _i) => {
+      return (row.map((cell, _j) => { 
+        if (_i === i && _j === j)
+          return { ...cell, isCursor: true, isWord: false }
+        else if (dir === 'across' && _i === i)
+          return { ...cell, isCursor: false, isWord: true }
+        else if (dir === 'down' && _j === j)
+          return { ...cell, isCursor: false, isWord: true }
+        return { ...cell, isCursor: false, isWord: false }
+      } ))
+    })
+
+    setCells(newCells)
+    setCursor({i:i, j:j, dir:dir})
   }
 
   return (
