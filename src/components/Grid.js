@@ -5,7 +5,7 @@ const Grid = ({ cells, onCursor }) => {
   return ( <div className='grid'> {
     cells.map((row, i) => { return (
       <div className='row' key={i}> {row.map((cell, j) => { return (
-        <Cell key={j} cell={cell} onCursor={onCursor}/>
+        <Cell key={j} cell={cell} onCursor={onCursor} />
       ) })} </div>
     ) }
   )} </div> )

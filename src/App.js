@@ -5,15 +5,15 @@ import Grid from './components/Grid'
 
 function App() {
   const [gridSize, setGridSize] = useState(15)
-  const [cells, setCells] = useState(
+  
+  // can i do an array of state instead of state of array
+  const [cells, setCells] = useState( 
     Array(gridSize).fill().map((_,i) =>
       new Array(gridSize).fill().map((_,j) => {
         return {
-          marker: 2,
+          marker: '',
           letter: 'x',
-          isCursor: false,
-          isWord: false,
-          isBlank: i === 3 || j === 5,
+          cellType: '', // null, blank, cursor, word
           i: i,
           j: j,
         }
@@ -25,8 +25,41 @@ function App() {
     j: -1,
     dir: 'across',
   })
+  const [mode, setMode] = useState(false)
+
+  const toggleBlankMode = () => {
+    setMode(!mode)
+  }
+
+  const onCursor = (i, j) => {
+    if (mode)
+      toggleBlank(i, j)
+    else
+      moveCursor(i, j)
+  }
+
+  const toggleBlank = (i, j) => {
+    let newCells = cells.map((row, _i) => {
+      return (row.map((cell, _j) => {
+        if (_i === i && _j === j)
+        {
+            return { ...cell,
+              marker: '',
+              cellType: (cell['cellType'] === 'blank') ? '' : 'blank',
+              letter: ''
+            }
+        }
+        if (cell['cellType'] === 'cursor' || cell['cellType'] === 'blank')
+          return { ...cell, marker: '' }
+        return { ...cell, marker: '', cellType: '' }
+      }))
+    })
+    setCells(resetMarkers(resetWord(cursor['i'], cursor['j'], newCells)));
+  }
 
   const moveCursor = (i, j) => {
+    if (cells[i][j]['cellType'] === 'blank') return
+
     let old_i = cursor['i']
     let old_j = cursor['j']
     let dir = cursor['dir']
@@ -35,47 +68,57 @@ function App() {
       dir = (dir === 'across') ? 'down' : 'across'
     }
 
+    cursor['dir'] = dir;
+
     let newCells = cells.map((row, _i) => {
       return (row.map((cell, _j) => { 
         if (_i === i && _j === j)
-          return { ...cell, isCursor: true, isWord: false }
-        return { ...cell, isCursor: false, isWord: false }
+          return { ...cell, cellType: 'cursor' }
+        else if (cell.cellType === 'blank')
+          return cell
+        return { ...cell, cellType: '' }
       } ))
     })
 
-    if (dir === 'across')
-    {
-      for (let _i=i-1; 0<=_i; _i--) {
-        if (newCells[_i][j]['isBlank'])
-          break;
-        newCells[_i][j]['isWord'] = true
-      }
-      for (let _i=i+1; _i<gridSize; _i++) {
-        if (newCells[_i][j]['isBlank'])
-          break;
-        newCells[_i][j]['isWord'] = true
-      }
-    } else if (dir === 'down') {
-      for (let _j=j-1; 0<=_j; _j--) {
-        if (newCells[i][_j]['isBlank'])
-          break;
-        newCells[i][_j]['isWord'] = true
-      }
-      for (let _j=j+1; _j<gridSize; _j++) {
-        if (newCells[i][_j]['isBlank'])
-          break;
-        newCells[i][_j]['isWord'] = true
-      }
+    setCells(resetWord(i, j, newCells));
+
+    setCursor({i:i, j:j, dir:dir})
+  }
+
+  const resetMarkers = (newCells) => {
+    
+    return newCells;
+  }
+
+  // takes new cell grid with cleared out word 
+  // finds & sets new word,
+  const resetWord = (i, j, newCells) => {
+    let dir = cursor['dir']
+
+    var idx = (dir === 'across') ? i : (dir === 'down') ? j : -1;
+
+    for (let _idx=idx-1; 0<=_idx; _idx--) {
+      let _i = (dir === 'across') ? _idx : (dir === 'down') ? i    : -1;
+      let _j = (dir === 'across') ? j    : (dir === 'down') ? _idx : -1;
+      if (newCells[_i][_j]['cellType'] === 'blank')
+        break;
+      newCells[_i][_j]['cellType'] = 'word'
+    }
+    for (let _idx=idx+1; _idx<gridSize; _idx++) {
+      let _i = (dir === 'across') ? _idx : (dir === 'down') ? i    : -1;
+      let _j = (dir === 'across') ? j    : (dir === 'down') ? _idx : -1;
+      if (newCells[_i][_j]['cellType'] === 'blank')
+        break;
+      newCells[_i][_j]['cellType'] = 'word'
     }
 
-    setCells(newCells)
-    setCursor({i:i, j:j, dir:dir})
+    return newCells;
   }
 
   return (
     <div className="container">
-      <Header title={"title"}/>
-      <Grid cells={cells} onCursor={moveCursor}/>
+      <Header title={"title"} toggleBlankMode={toggleBlankMode}/>
+      <Grid cells={cells} onCursor={onCursor}/>
     </div>
   );
 }
